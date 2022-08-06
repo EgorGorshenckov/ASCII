@@ -7,7 +7,11 @@ GRADIENT: str = " .:!/r(l1Z9$@"
 GRADIENT_NUM: int = len(GRADIENT)
 
 
-def get_terminal_size():
+def get_terminal_size() -> tuple[int]:
+    """
+    Получение размеров терминала в символах
+    :return (столбцы, строки):
+    """
     try:
         return tuple(map(lambda x: int(x), os.popen('stty size', 'r').read().split()))[::-1]
     except OSError as ex:

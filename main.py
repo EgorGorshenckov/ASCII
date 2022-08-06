@@ -5,9 +5,11 @@ import time
 import os
 import cv2
 
-
+# Яркость
 GRADIENT: str = " .:!/r(l1Z9$@"
+# Количество возможных яркостей
 GRADIENT_NUM: int = len(GRADIENT)
+# Име папки в которой находится файл с репозиторием
 FOLDER_AP = os.path.abspath(getsourcefile(lambda: 0) + "/..")
 
 
@@ -37,17 +39,19 @@ class IMG:
         self.url: str = url
 
         if internet_or_computer:
-            self.path = self.get_path()
+            self.path: str = self.get_path()
         else:
-            self.path = self.url
+            self.path: str = self.url
 
         img = Image.open(self.path)
         self.pix = img.load()
         self.size = img.size
-        self.t_size = get_terminal_size()
+        self.t_size: tuple[int] = get_terminal_size()
 
-        self.quality_x = 1
-        self.quality_y = 2
+        # В случае плохого вывода изображения поиграйтесь с quality_x и quality_y
+        # !! quality_x / quality_y = 0.5 !!
+        self.quality_x: int = 1
+        self.quality_y: int = 2
 
         if self.size[1] > self.t_size[1]:
             self.quality_y = self.size[1] // self.t_size[1]
@@ -86,7 +90,7 @@ class IMG:
 
     def _center_Ox(self, r: str):
         """
-        Метод о центровки строк
+        Метод центровки строк
         :param [строка]:
         :return:
         """
@@ -94,18 +98,25 @@ class IMG:
             return ' ' * ((self.t_size[0] - len(r)) // 2) + r + ' ' * ((self.t_size[0] - len(r)) // 2)
         return r
 
-    def _center_Oy(self, returner):
+    def _center_Oy(self, returner: list[str]):
+        """
+        Метод центровки столбцов
+        :param [изображение в формате ASCII]:
+        :return:
+        """
         if len(returner) < self.t_size[1]:
             const = self.t_size[1] - len(returner)
             senter = [' ' * self.t_size[0]]
             return senter * (const // 2 + const % 2) + returner + senter * (const // 2)
         return returner
 
-    def photo_name(self):
+    def photo_name(self) -> str:
+        """ Метод получения имени фотографии """
         return self.url.split('/')[-1]
 
     @staticmethod
     def symbol(bright):
+        """ Метод определения яркости символа """
         for i in range(GRADIENT_NUM):
             if bright <= (i + 1) * 255 / GRADIENT_NUM:
                 return i
@@ -113,6 +124,9 @@ class IMG:
 
 
 class MP4:
+
+    """ Класс видио """
+
     def __init__(self, internet_or_computer: bool, url: str, FPS: int = 24):
         self.url: str = url
 
@@ -129,6 +143,7 @@ class MP4:
         self.redding()
 
     def redding(self):
+        """  По-кадровое сохранение видио в файл 'video' """
         try:
             video_capture = cv2.VideoCapture(self.path)
             video_capture.set(cv2.CAP_PROP_FPS, self.FPS)
@@ -147,7 +162,8 @@ class MP4:
         except FileExistsError:
             self.saved_frame_name = len(os.listdir(f"{FOLDER_AP}/video/{self.video_name()}/"))
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """ Покадровый вывод видео """
         video = []
 
         for i in range(self.saved_frame_name):
@@ -159,13 +175,14 @@ class MP4:
 
         return 'Done'
 
-    def video_name(self):
+    def video_name(self) -> str:
+        """ Получение имени видео """
         return self.url.split('/')[-1].split('.')[0]
 
 
 def main():
     try:
-        i = MP4(False, input('Введите ссылку / путь: '), int(input('FPS - не больше 30:')))
+        i = MP4(False, input('Введите путь: '), int(input('FPS - не больше 30:')))
         t = time.time()
         print(i)
         print(time.time() - t)
