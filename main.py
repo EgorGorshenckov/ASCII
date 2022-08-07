@@ -5,12 +5,21 @@ import time
 import os
 import cv2
 
+
 # Яркость
 GRADIENT: str = " .:!/r(l1Z9$@"
 # Количество возможных яркостей
 GRADIENT_NUM: int = len(GRADIENT)
 # Име папки в которой находится файл с репозиторием
 FOLDER_AP = os.path.abspath(getsourcefile(lambda: 0) + "/..")
+
+
+def error_printer(ex: Exception):
+    """ Красивый вывод ошибок """
+    returner = '\n' * 2 + '+' + '-' * len(ex.__str__()) + '+\n'
+    returner += '|' + ex.__str__() + '|\n'
+    returner += '+' + '-' * len(ex.__str__()) + '+\n'
+    print(returner)
 
 
 def get_terminal_size() -> tuple[int]:
@@ -179,6 +188,13 @@ class MP4:
         """ Получение имени видео """
         return self.url.split('/')[-1].split('.')[0]
 
+    def get_path(self) -> str:
+        """ Загружает и возвращает путь до загруженого файла """
+        import urllib.request
+        fool_path = FOLDER_AP + '/loaded_videos/' + self.url.split('/')[-1]
+        urllib.request.urlretrieve(self.url, fool_path)
+        return fool_path
+
 
 def main():
     try:
@@ -187,9 +203,7 @@ def main():
         print(i)
         print(time.time() - t)
     except Exception as ex:
-        print('\n' * 2 + '+' + '-' * len(ex.__str__()) + '+')
-        print('|' + ex.__str__() + '|')
-        print('+' + '-' * len(ex.__str__()) + '+')
+        error_printer(ex)
 
 
 if __name__ == '__main__':
