@@ -1,5 +1,6 @@
 from PIL import Image
 from inspect import getsourcefile
+from sty import Style, RgbFg, fg
 import requests
 import time
 import os
@@ -12,6 +13,7 @@ GRADIENT: str = " .:!/r(l1Z9$@"
 GRADIENT_NUM: int = len(GRADIENT)
 # Име папки в которой находится файл с репозиторием
 FOLDER_AP = os.path.abspath(getsourcefile(lambda: 0) + "/..")
+
 
 
 def error_printer(ex: Exception):
@@ -59,8 +61,8 @@ class IMG:
 
         # В случае плохого вывода изображения поиграйтесь с quality_x и quality_y
         # !! quality_x / quality_y = 0.5 !!
-        self.quality_x: int = 1
-        self.quality_y: int = 2
+        self.quality_x: int = 2
+        self.quality_y: int = 4
 
         if self.size[1] > self.t_size[1]:
             self.quality_y = self.size[1] // self.t_size[1]
@@ -87,24 +89,30 @@ class IMG:
         """
         returner = []
         for y in range(self.size[1]):
-            r = ''
+            r = []
             if not y % self.quality_y:
+                symbol_counter = 0
                 for x in range(self.size[0]):
                     if not x % self.quality_x:
-                        r += GRADIENT[self.symbol(sum(self.pix[x, y]) / 3)]
+                        pix = self.pix[x, y]
+                        fg.now = Style(RgbFg(*pix))
+                        r.append(fg.now + '@' + '\033[0m')
+                        # r.append(fg.now + GRADIENT[self.symbol(sum(pix) / 3)] + '\033[0m')
+                        symbol_counter += 1
 
-                returner.append(self._center_Ox(r)[:self.t_size[0]])
+                returner.append(''.join(r[:self.t_size[0]]))
 
-        return '\n'.join(self._center_Oy(returner)[:self.t_size[1]])
+        return '\n'.join(self._center_Oy(returner))
 
-    def _center_Ox(self, r: str):
+    def _center_Ox(self, r, symbol_counter):
         """
         Метод центровки строк
         :param [строка]:
         :return:
         """
-        if len(r) < self.t_size[0]:
-            return ' ' * ((self.t_size[0] - len(r)) // 2) + r + ' ' * ((self.t_size[0] - len(r)) // 2)
+        if symbol_counter < self.t_size[0]:
+            add = ' ' * ((self.t_size[0] - symbol_counter) // 2)
+            return add + r + add
         return r
 
     def _center_Oy(self, returner: list[str]):
@@ -198,7 +206,8 @@ class MP4:
 
 def main():
     try:
-        i = MP4(False, input('Введите путь: '), int(input('FPS - не больше 30:')))
+        i = MP4(False, input('Введите путь: '))
+        # i = IMG(False, input('Введите путь: '))
         t = time.time()
         print(i)
         print(time.time() - t)
